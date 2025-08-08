@@ -5,9 +5,13 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npx next build",
     "start": "next start",
     "lint": "next lint"
+  },
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
   },
   "dependencies": {
     "next": "^14.0.0",
