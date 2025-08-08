@@ -26,6 +26,32 @@ app.use(cors({
 }))
 app.use(express.json())
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    connections: connectedUsers ? connectedUsers.size : 0,
+    environment: process.env.NODE_ENV || 'development',
+    port: process.env.PORT || 3001
+  })
+})
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'BlockRTC Backend Server',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      debug_users: '/debug/users',
+      debug_messages: '/debug/messages/:userId'
+    }
+  })
+})
+
 // Debug endpoint to check connected users
 app.get('/debug/users', (req, res) => {
   const users = Array.from(connectedUsers.values())
