@@ -1,7 +1,11 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "npx next build",
+  "functions": {
+    "pages/api/**/*.js": {
+      "runtime": "nodejs22.x"
+    }
+  },
   "env": {
     "NEXT_PUBLIC_SOCKET_URL": "https://blockrtc-backend-production.up.railway.app",
     "NEXT_PUBLIC_ENVIRONMENT": "production"
