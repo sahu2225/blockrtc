@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WhatsApp Clone Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px; margin: 5px; }
+        input { padding: 8px; margin: 5px; width: 300px; }
+        .log { background: #f5f5f5; padding: 10px; height: 200px; overflow-y: scroll; }
+    </style>
+</head>
+<body>
+    <h1>WhatsApp Clone Debug Tool</h1>
+    
+    <div class="section">
+        <h3>Server Status</h3>
+        <button onclick="checkConnectedUsers()">Check Connected Users</button>
+        <button onclick="checkMessages()">Check Messages</button>
+        <div id="serverStatus"></div>
+    </div>
+    
+    <div class="section">
+        <h3>Test Message</h3>
+        <input type="text" id="sender" placeholder="Sender wallet address" />
+        <input type="text" id="receiver" placeholder="Receiver wallet address" />
+        <input type="text" id="message" placeholder="Test message" />
+        <button onclick="sendTestMessage()">Send Test Message</button>
+    </div>
+    
+    <div class="section">
+        <h3>Debug Log</h3>
+        <div id="debugLog" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function checkConnectedUsers() {
+            try {
+                const response = await fetch('http://localhost:3001/debug/users');
+                const data = await response.json();
+                document.getElementById('serverStatus').innerHTML = `
+                    <strong>Connected Users:</strong> ${data.totalConnections}<br>
+                    <strong>Users:</strong> ${JSON.stringify(data.connectedUsers, null, 2)}<br>
+                    <strong>Socket IDs:</strong> ${JSON.stringify(data.socketIds, null, 2)}
+                `;
+                log(`Connected users: ${data.connectedUsers.join(', ')}`);
+            } catch (error) {
+                log(`Error checking users: ${error.message}`);
+            }
+        }
+
+        async function checkMessages() {
+            const userId = prompt('Enter wallet address to check messages:');
+            if (!userId) return;
+            
+            try {
+                const response = await fetch(`http://localhost:3001/debug/messages/${userId}`);
+                const data = await response.json();
+                log(`Messages for ${userId}: ${data.messageCount} messages`);
+                console.log('Messages:', data.messages);
+            } catch (error) {
+                log(`Error checking messages: ${error.message}`);
+            }
+        }
+
+        function sendTestMessage() {
+            const sender = document.getElementById('sender').value;
+            const receiver = document.getElementById('receiver').value;
+            const message = document.getElementById('message').value;
+            
+            if (!sender || !receiver || !message) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            log(`Test: Would send "${message}" from ${sender} to ${receiver}`);
+            log('Note: This is just a UI test. Use the actual app to send real messages.');
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+
+        // Auto-refresh connected users every 5 seconds
+        setInterval(checkConnectedUsers, 5000);
+        
+        // Initial check
+        checkConnectedUsers();
+    </script>
+</body>
+</html>

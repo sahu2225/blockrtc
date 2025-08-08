@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Message Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px; margin: 5px; }
+        input { padding: 8px; margin: 5px; width: 300px; }
+        .log { background: #f5f5f5; padding: 10px; height: 200px; overflow-y: scroll; }
+    </style>
+</head>
+<body>
+    <h1>Message Testing Tool</h1>
+    
+    <div class="section">
+        <h3>Check Connected Users</h3>
+        <button onclick="checkUsers()">Check Connected Users</button>
+        <div id="userStatus"></div>
+    </div>
+    
+    <div class="section">
+        <h3>Send Test Message</h3>
+        <input type="text" id="sender" placeholder="Sender wallet address" />
+        <input type="text" id="receiver" placeholder="Receiver wallet address" />
+        <input type="text" id="content" placeholder="Message content" />
+        <button onclick="sendTestMessage()">Send Test Message</button>
+    </div>
+    
+    <div class="section">
+        <h3>Debug Log</h3>
+        <div id="debugLog" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function checkUsers() {
+            try {
+                const response = await fetch('http://localhost:3001/debug/users');
+                const data = await response.json();
+                document.getElementById('userStatus').innerHTML = `
+                    <strong>Connected Users:</strong> ${data.totalConnections}<br>
+                    <strong>Users:</strong> ${JSON.stringify(data.connectedUsers, null, 2)}<br>
+                `;
+                log(`Connected users: ${data.connectedUsers.join(', ')}`);
+            } catch (error) {
+                log(`Error checking users: ${error.message}`);
+            }
+        }
+
+        async function sendTestMessage() {
+            const sender = document.getElementById('sender').value;
+            const receiver = document.getElementById('receiver').value;
+            const content = document.getElementById('content').value;
+            
+            if (!sender || !receiver) {
+                alert('Please fill sender and receiver addresses');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3001/debug/test-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ sender, receiver, content })
+                });
+                
+                const result = await response.json();
+                log(`Test message result: ${JSON.stringify(result)}`);
+                
+                if (result.success) {
+                    log(`✅ Message sent successfully!`);
+                } else {
+                    log(`❌ Message failed: ${result.message}`);
+                }
+            } catch (error) {
+                log(`Error sending test message: ${error.message}`);
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+
+        // Auto-refresh connected users every 5 seconds
+        setInterval(checkUsers, 5000);
+        
+        // Initial check
+        checkUsers();
+    </script>
+</body>
+</html>

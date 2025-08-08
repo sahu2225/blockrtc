@@ -1,0 +1,19 @@
+{
+  "name": "blockrtc-load-test",
+  "version": "1.0.0",
+  "description": "Load testing tools for BlockRTC",
+  "main": "simple-load-test.js",
+  "scripts": {
+    "test": "node simple-load-test.js",
+    "test-small": "node simple-load-test.js --connections 50 --messages 5",
+    "test-medium": "node simple-load-test.js --connections 200 --messages 10",
+    "test-large": "node simple-load-test.js --connections 1000 --messages 20",
+    "test-stress": "node simple-load-test.js --connections 5000 --messages 50"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.0"
+  },
+  "bin": {
+    "blockrtc-load-test": "./simple-load-test.js"
+  }
+}
